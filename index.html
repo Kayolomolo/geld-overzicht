@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f172a">
+<title>Kay's Geld Overzicht</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="Icon.jpeg">
+<link rel="icon" href="Icon.jpeg">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --card-hover: #334155;
+  --accent: #3b82f6;
+  --accent2: #8b5cf6;
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+  --border: #334155;
+  --radius: 16px;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100dvh; padding-bottom: 80px;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 480px; margin: 0 auto; padding: 16px; }
+
+.header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0 20px; }
+.header h1 { font-size: 22px; font-weight: 700; }
+.period-selector {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--card); border-radius: 12px; padding: 6px 12px;
+}
+.period-selector select {
+  background: none; border: none; color: var(--text); font-size: 13px;
+  font-family: inherit; cursor: pointer; outline: none; -webkit-appearance: none;
+}
+
+/* Salary input section */
+.salary-section {
+  background: linear-gradient(135deg, #1a3a2a, #1e293b);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: var(--radius); padding: 18px; margin-bottom: 16px;
+}
+.salary-section h3 { font-size: 14px; color: var(--green); margin-bottom: 10px; }
+.salary-row { display: flex; gap: 10px; align-items: center; }
+.salary-input {
+  flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 18px; font-weight: 700;
+  font-family: inherit; outline: none; text-align: center;
+}
+.salary-input:focus { border-color: var(--green); }
+.salary-input::placeholder { color: var(--text2); font-weight: 400; font-size: 14px; }
+
+/* Leefgeld section */
+.leefgeld-section {
+  background: linear-gradient(135deg, #1e1a3a, #1e293b);
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: var(--radius); padding: 18px; margin-bottom: 16px;
+}
+.leef-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.leef-top h3 { font-size: 14px; color: var(--accent2); }
+.leef-target { font-size: 12px; color: var(--text2); }
+.leef-input-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.leef-input-row label { font-size: 13px; color: var(--text2); }
+.leef-input-wrap { display: flex; align-items: center; gap: 6px; }
+.leef-euro { font-size: 18px; font-weight: 700; color: var(--text2); }
+.leef-input {
+  width: 120px; padding: 10px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 18px; font-weight: 700;
+  font-family: inherit; outline: none; text-align: center;
+}
+.leef-input:focus { border-color: var(--accent2); }
+.leef-result {
+  background: var(--bg); border-radius: 10px; padding: 12px; text-align: center;
+  font-size: 14px;
+}
+.leef-result strong { font-size: 18px; }
+
+/* Hoofdrekening card */
+.hoofd-card {
+  background: var(--card); border-top: 3px solid var(--accent);
+  border-radius: var(--radius); padding: 14px; text-align: center; margin-bottom: 16px;
+}
+.hoofd-card .acc-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Summary strip */
+.summary-strip {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px;
+}
+.strip-card { background: var(--card); border-radius: 12px; padding: 12px; text-align: center; }
+.strip-card .s-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.strip-card .s-value { font-size: 16px; font-weight: 700; }
+.strip-card.income .s-value { color: var(--green); }
+.strip-card.expense .s-value { color: var(--red); }
+.strip-card.savings .s-value { color: var(--green); }
+
+/* Verdeling section */
+.verdeling-section {
+  background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+}
+.verdeling-section h3 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+.verdeling-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--bg);
+}
+.verdeling-row:last-child { border: none; }
+.vr-left { display: flex; align-items: center; gap: 10px; }
+.vr-icon { font-size: 16px; }
+.vr-name { font-size: 14px; }
+.vr-amount { font-size: 14px; font-weight: 600; }
+.vr-amount.green { color: var(--green); }
+.vr-amount.red { color: var(--red); }
+.vr-amount.blue { color: var(--accent); }
+.vr-amount.purple { color: var(--accent2); }
+
+/* Vaste lasten list */
+.section-title {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.section-title h2 { font-size: 17px; font-weight: 700; }
+.section-title .add-btn {
+  background: var(--accent); border: none; color: #fff; padding: 5px 12px;
+  border-radius: 8px; font-size: 12px; cursor: pointer;
+}
+
+.tx-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.tx-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--card); border-radius: 12px; padding: 12px 14px;
+  cursor: pointer; transition: background 0.2s;
+}
+.tx-item:active { background: var(--card-hover); }
+.tx-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+}
+.tx-icon.expense { background: rgba(239,68,68,0.12); }
+.tx-icon.income { background: rgba(16,185,129,0.12); }
+.tx-icon.extra { background: rgba(245,158,11,0.12); }
+.tx-info { flex: 1; min-width: 0; }
+.tx-info .name { font-size: 14px; font-weight: 500; }
+.tx-info .sub { font-size: 11px; color: var(--text2); }
+.tx-amt { font-size: 14px; font-weight: 600; white-space: nowrap; }
+.tx-amt.red { color: var(--red); }
+.tx-amt.orange { color: var(--orange); }
+.tx-amt.green { color: var(--green); }
+
+/* Chart */
+.chart-section {
+  background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 20px;
+}
+.chart-section h3 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+.bar-chart { display: flex; flex-direction: column; gap: 8px; }
+.bar-row { display: flex; align-items: center; gap: 10px; }
+.bar-label { font-size: 12px; color: var(--text2); width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+.bar-track { flex: 1; height: 22px; background: var(--bg); border-radius: 6px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 6px; transition: width 0.6s; min-width: 2px; display: flex; align-items: center; padding-left: 8px; }
+.bar-val { font-size: 11px; font-weight: 600; white-space: nowrap; }
+
+/* Ring */
+.ring-section { background: var(--card); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; text-align: center; }
+.ring-container { position: relative; width: 150px; height: 150px; margin: 0 auto 10px; }
+.ring-container svg { transform: rotate(-90deg); }
+.ring-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.ring-center .pct { font-size: 26px; font-weight: 800; }
+.ring-center .sublabel { font-size: 11px; color: var(--text2); }
+.ring-label { font-size: 13px; color: var(--text2); }
+
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--card); border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around; align-items: center;
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom)); z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: none; color: var(--text2); cursor: pointer;
+  font-size: 10px; padding: 4px 12px; transition: color 0.2s;
+}
+.nav-item.active { color: var(--accent); }
+.nav-item svg { width: 22px; height: 22px; }
+.nav-add {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; color: #fff; font-size: 26px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: -20px; box-shadow: 0 4px 15px rgba(59,130,246,0.4);
+}
+
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 200; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px);
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--card); border-radius: 20px 20px 0 0; width: 100%;
+  max-width: 480px; padding: 20px 20px max(20px, env(safe-area-inset-bottom));
+  max-height: 85dvh; overflow-y: auto; animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+.modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; text-align: center; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 6px; }
+.form-group input, .form-group select {
+  width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 15px; font-family: inherit;
+  outline: none; transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+.submit-btn {
+  width: 100%; padding: 14px; border-radius: 12px; border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 6px;
+}
+.delete-btn {
+  width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--red);
+  background: none; color: var(--red); font-size: 14px; cursor: pointer; font-family: inherit; margin-top: 8px;
+}
+
+/* Pages */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Stats */
+.stat-card { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+.stat-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+.stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--bg); }
+.stat-row:last-child { border: none; }
+.stat-row .stat-label { font-size: 13px; color: var(--text2); }
+.stat-row .stat-value { font-size: 14px; font-weight: 600; }
+
+/* Goals */
+.goal-card { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 10px; cursor: pointer; }
+.goal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.goal-top .goal-name { font-size: 14px; font-weight: 600; }
+.goal-top .goal-pct { font-size: 13px; color: var(--accent); font-weight: 600; }
+.goal-bar-bg { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+.goal-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width 0.6s; }
+.goal-amounts { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); }
+
+/* New period button */
+.new-period-btn {
+  width: 100%; padding: 14px; border-radius: 12px;
+  border: 2px dashed var(--accent); background: rgba(59,130,246,0.08);
+  color: var(--accent); font-size: 15px; font-weight: 600; cursor: pointer;
+  font-family: inherit; margin-bottom: 16px; transition: all 0.2s;
+}
+.new-period-btn:active { background: rgba(59,130,246,0.15); }
+
+/* Settings */
+.settings-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 8px;
+}
+.settings-item .si-label { font-size: 14px; }
+.settings-item .si-value { font-size: 14px; color: var(--text2); }
+.settings-item .si-edit {
+  background: none; border: none; color: var(--accent); font-size: 13px; cursor: pointer;
+}
+
+/* Toast */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--green); color: #fff; padding: 10px 20px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; z-index: 300; opacity: 0;
+  transition: opacity 0.3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* Empty state */
+.empty { text-align: center; padding: 30px 0; color: var(--text2); font-size: 14px; }
+
+/* Setup screen */
+.setup-overlay {
+  position: fixed; inset: 0; background: var(--bg); z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+}
+.setup-box { width: 100%; max-width: 400px; padding: 30px; text-align: center; }
+.setup-box h1 { font-size: 28px; margin-bottom: 8px; }
+.setup-box p { color: var(--text2); font-size: 14px; margin-bottom: 24px; }
+.setup-box .form-group { text-align: left; margin-bottom: 18px; }
+.setup-box .form-group label { display: block; font-size: 14px; color: var(--text2); margin-bottom: 6px; }
+.setup-box .form-group input {
+  width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text); font-size: 18px; font-weight: 600;
+  font-family: inherit; outline: none; text-align: center;
+}
+.setup-box .form-group input:focus { border-color: var(--accent); }
+.setup-box .form-group .hint { font-size: 12px; color: var(--text2); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- SETUP SCREEN -->
+<div class="setup-overlay" id="setupScreen" style="display:none">
+  <div class="setup-box">
+    <h1>💰 Welkom!</h1>
+    <p>Stel een paar dingen in om te beginnen</p>
+    <div class="form-group">
+      <label>Op welke dag krijg je salaris?</label>
+      <input type="text" id="setupSalarisdag" placeholder="23" min="1" max="31" inputmode="numeric">
+      <div class="hint">Bijv. 23 als je op de 23e betaald krijgt</div>
+    </div>
+    <div class="form-group">
+      <label>Hoeveel wil je per periode sparen? (€)</label>
+      <input type="text" id="setupSparen" placeholder="0" step="10" inputmode="decimal" lang="en">
+      <div class="hint">Dit bedrag wordt apart gezet. Vul 0 in als je niet vast spaart</div>
+    </div>
+    <div class="form-group">
+      <label>Hoeveel leefgeld per periode? (€)</label>
+      <input type="text" id="setupLeefgeld" placeholder="200" step="10" inputmode="decimal" lang="en">
+      <div class="hint">Dit zet je op je leefgeldrekening voor leuke dingen</div>
+    </div>
+    <button class="submit-btn" onclick="finishSetup()" style="margin-top:10px">Starten</button>
+  </div>
+</div>
+
+<!-- HOME PAGE -->
+<div class="container page active" id="page-home">
+  <div class="header">
+    <h1>💰 Overzicht</h1>
+    <div class="period-selector">
+      <select id="periodSelect" onchange="switchPeriod()"></select>
+    </div>
+  </div>
+
+  <!-- Salary input -->
+  <div class="salary-section">
+    <h3>💼 Salaris deze periode</h3>
+    <div class="salary-row">
+      <span style="font-size:20px;font-weight:700;color:var(--text2)">€</span>
+      <input type="text" class="salary-input" id="salaryInput" placeholder="Vul je salaris in" step="0.01" inputmode="decimal" lang="en" onchange="saveSalary()">
+    </div>
+  </div>
+
+  <!-- Leefgeld section -->
+  <div class="leefgeld-section">
+    <div class="leef-top">
+      <h3>🎉 Leefgeldrekening</h3>
+      <div class="leef-target">Doel: <span id="leefTarget">€200,00</span></div>
+    </div>
+    <div class="leef-input-row">
+      <label>Huidig saldo:</label>
+      <div class="leef-input-wrap">
+        <span class="leef-euro">€</span>
+        <input type="text" class="leef-input" id="leefSaldoInput" placeholder="0.00" step="0.01" inputmode="decimal" lang="en" onchange="saveLeefSaldo()">
+      </div>
+    </div>
+    <div class="leef-result" id="leefResult"></div>
+  </div>
+
+  <!-- Hoofdrekening -->
+  <div class="hoofd-card">
+    <div class="acc-label">Hoofdrekening — vaste lasten & kosten</div>
+    <div class="acc-amount" id="hoofdAmount" style="color:var(--accent);font-size:22px;font-weight:800;margin-top:6px">€0,00</div>
+  </div>
+
+  <!-- Verdeling: where does the money go -->
+  <div class="verdeling-section">
+    <h3>📊 Verdeling salaris</h3>
+    <div id="verdelingContent"></div>
+  </div>
+
+  <!-- Ring: how much is left -->
+  <div class="ring-section">
+    <div class="ring-container">
+      <svg width="150" height="150" viewBox="0 0 150 150">
+        <circle cx="75" cy="75" r="65" fill="none" stroke="#1a2332" stroke-width="11"/>
+        <circle id="ringCircle" cx="75" cy="75" r="65" fill="none" stroke="url(#ringGrad)" stroke-width="11" stroke-linecap="round" stroke-dasharray="408" stroke-dashoffset="408"/>
+        <defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#3b82f6"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="ring-center">
+        <div class="pct" id="ringPct">0%</div>
+        <div class="sublabel">over om te besteden</div>
+      </div>
+    </div>
+    <div class="ring-label" id="ringLabel">Vul je salaris in om te beginnen</div>
+  </div>
+
+  <!-- Vaste lasten -->
+  <div class="section-title">
+    <h2>🔒 Vaste lasten</h2>
+    <button class="add-btn" onclick="openAddModal('vast')">+ Toevoegen</button>
+  </div>
+  <div class="tx-list" id="vastList"></div>
+
+  <!-- Extra kosten -->
+  <div class="section-title">
+    <h2>⚡ Extra kosten deze periode</h2>
+    <button class="add-btn" onclick="openAddModal('extra')">+ Toevoegen</button>
+  </div>
+  <div class="tx-list" id="extraList"></div>
+
+  <!-- Extra inkomsten -->
+  <div class="section-title">
+    <h2>💵 Extra inkomsten</h2>
+    <button class="add-btn" onclick="openAddModal('extraIncome')">+ Toevoegen</button>
+  </div>
+  <div class="tx-list" id="extraIncomeList"></div>
+
+  <!-- Chart -->
+  <div class="chart-section">
+    <h3>Uitgaven per categorie</h3>
+    <div class="bar-chart" id="barChart"></div>
+  </div>
+</div>
+
+<!-- STATS PAGE -->
+<div class="container page" id="page-stats">
+  <div class="header"><h1>📊 Statistieken</h1></div>
+  <div id="statsContent"></div>
+</div>
+
+<!-- GOALS PAGE -->
+<div class="container page" id="page-goals">
+  <div class="header">
+    <h1>🎯 Spaardoelen</h1>
+    <button style="background:var(--accent);border:none;color:#fff;padding:6px 14px;border-radius:10px;font-size:13px;cursor:pointer" onclick="openGoalModal()">+ Nieuw</button>
+  </div>
+  <div id="goalsList"></div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="container page" id="page-settings">
+  <div class="header"><h1>⚙️ Instellingen</h1></div>
+  <div id="settingsContent"></div>
+</div>
+
+<!-- ADD/EDIT TRANSACTION MODAL -->
+<div class="modal-overlay" id="txModal" onclick="if(event.target===this)closeModal('txModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="modalTitle">Toevoegen</h2>
+    <div class="form-group">
+      <label>Naam</label>
+      <input type="text" id="txName" placeholder="bijv. Zorgverzekering">
+    </div>
+    <div class="form-group">
+      <label>Bedrag (€)</label>
+      <input type="text" id="txAmount" placeholder="0.00" step="0.01" inputmode="decimal" lang="en">
+    </div>
+    <div class="form-group">
+      <label>Categorie</label>
+      <select id="txCategory">
+        <option value="Verzekeringen">🛡️ Verzekeringen</option>
+        <option value="Vervoer">🚗 Vervoer</option>
+        <option value="Telecom">📱 Telecom</option>
+        <option value="Abonnementen">🎵 Abonnementen</option>
+        <option value="Studie">📚 Studie / Duo</option>
+        <option value="Wonen">🏠 Wonen</option>
+        <option value="Persoonlijk">👤 Persoonlijk</option>
+        <option value="Gezondheid">🏥 Gezondheid</option>
+        <option value="Boodschappen">🛒 Boodschappen</option>
+        <option value="Sparen">🐷 Sparen</option>
+        <option value="Overig">📦 Overig</option>
+      </select>
+    </div>
+    <div class="form-group" id="rekGroup">
+      <label>Rekening</label>
+      <select id="txRekening">
+        <option value="hoofd">Hoofdrekening</option>
+        <option value="leef">Leefgeldrekening</option>
+      </select>
+    </div>
+    <input type="hidden" id="txKind" value="vast">
+    <button class="submit-btn" onclick="saveTx()">Opslaan</button>
+    <button class="delete-btn" id="deleteTxBtn" style="display:none" onclick="deleteTx()">Verwijderen</button>
+  </div>
+</div>
+
+<!-- LEEFGELD MODAL -->
+<div class="modal-overlay" id="leefModal" onclick="if(event.target===this)closeModal('leefModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Leefgeld instellen</h2>
+    <div class="form-group">
+      <label>Hoeveel zet je opzij voor leefgeld? (€)</label>
+      <input type="text" id="leefInput" placeholder="200" step="10" inputmode="decimal" lang="en">
+    </div>
+    <button class="submit-btn" onclick="saveLeefgeld()">Opslaan</button>
+  </div>
+</div>
+
+<!-- GOAL MODAL -->
+<div class="modal-overlay" id="goalModal" onclick="if(event.target===this)closeModal('goalModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="goalModalTitle">Spaardoel toevoegen</h2>
+    <div class="form-group">
+      <label>Doel</label>
+      <input type="text" id="goalName" placeholder="bijv. Vakantie">
+    </div>
+    <div class="form-group">
+      <label>Doelbedrag (€)</label>
+      <input type="text" id="goalTarget" placeholder="1000" step="10" inputmode="decimal" lang="en">
+    </div>
+    <div class="form-group">
+      <label>Al gespaard (€)</label>
+      <input type="text" id="goalSaved" placeholder="0" step="10" inputmode="decimal" lang="en">
+    </div>
+    <button class="submit-btn" onclick="saveGoal()">Opslaan</button>
+    <button class="delete-btn" id="deleteGoalBtn" style="display:none" onclick="deleteGoal()">Verwijderen</button>
+  </div>
+</div>
+
+<!-- SALARISDAG MODAL -->
+<div class="modal-overlay" id="salarisdagModal" onclick="if(event.target===this)closeModal('salarisdagModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Salarisdag wijzigen</h2>
+    <div class="form-group">
+      <label>Op welke dag krijg je salaris? (1-31)</label>
+      <input type="text" id="salarisdagInput" min="1" max="31" inputmode="numeric">
+    </div>
+    <button class="submit-btn" onclick="saveSalarisdag()">Opslaan</button>
+  </div>
+</div>
+
+<!-- SPAREN MODAL -->
+<div class="modal-overlay" id="sparenModal" onclick="if(event.target===this)closeModal('sparenModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Spaarbedrag instellen</h2>
+    <div class="form-group">
+      <label>Hoeveel wil je per periode sparen? (€)</label>
+      <input type="text" id="sparenInput" placeholder="0" step="10" inputmode="decimal" lang="en">
+    </div>
+    <button class="submit-btn" onclick="saveSparen()">Opslaan</button>
+  </div>
+</div>
+
+<!-- NEW PERIOD MODAL -->
+<div class="modal-overlay" id="newPeriodModal" onclick="if(event.target===this)closeModal('newPeriodModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Nieuwe periode starten</h2>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:16px;text-align:center">
+      Start een nieuwe periode.<br>Je vaste lasten worden automatisch overgenomen.
+    </p>
+    <div class="form-group">
+      <label>Startdatum (salaris dag)</label>
+      <input type="date" id="newPeriodDate">
+    </div>
+    <button class="submit-btn" onclick="createNewPeriod()">Nieuwe periode starten</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-item active" onclick="goPage('home',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10"/></svg>
+    Home
+  </button>
+  <button class="nav-item" onclick="goPage('stats',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+    Stats
+  </button>
+  <button class="nav-add" onclick="openNewPeriodModal()">+</button>
+  <button class="nav-item" onclick="goPage('goals',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    Doelen
+  </button>
+  <button class="nav-item" onclick="goPage('settings',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Meer
+  </button>
+</div>
+
+<script>
+const STORAGE_KEY = 'kay_geld_v2';
+const ICONS = {
+  'Verzekeringen': '🛡️', 'Vervoer': '🚗', 'Telecom': '📱', 'Abonnementen': '🎵',
+  'Studie': '📚', 'Wonen': '🏠', 'Persoonlijk': '👤', 'Gezondheid': '🏥',
+  'Boodschappen': '🛒', 'Sparen': '🐷', 'Overig': '📦', 'Salaris': '💼',
+  'Toeslagen': '🏛️', 'Overig inkomen': '💵'
+};
+const CAT_COLORS = {
+  'Verzekeringen': '#f59e0b', 'Vervoer': '#3b82f6', 'Telecom': '#8b5cf6',
+  'Abonnementen': '#ec4899', 'Studie': '#6ee7b7', 'Wonen': '#ef4444',
+  'Persoonlijk': '#06b6d4', 'Gezondheid': '#f43f5e', 'Boodschappen': '#f97316',
+  'Sparen': '#10b981', 'Overig': '#6b7280'
+};
+
+function getSalarisdag() { return data.salarisdag || 23; }
+
+function makePeriodId(date) {
+  const d = new Date(date);
+  const dag = getSalarisdag();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(dag).padStart(2,'0')}`;
+}
+
+function currentPeriodId() {
+  const now = new Date();
+  const dag = getSalarisdag();
+  if (now.getDate() >= dag) return makePeriodId(now);
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, dag);
+  return makePeriodId(prev);
+}
+
+function periodLabel(pid) {
+  const [y, m, d] = pid.split('-');
+  const dag = parseInt(d);
+  const start = new Date(y, m - 1, dag);
+  const end = new Date(y, m, dag - 1);
+  const f = dt => dt.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+  return `${f(start)} - ${f(end)} ${y}`;
+}
+
+const defaultData = {
+  periods: {},
+  vasteLasten: [],
+  leefgeld: 200,
+  sparen: 0,
+  salarisdag: null,
+  goals: [],
+  currentPeriod: null
+};
+
+let data, editingTxId = null, editingGoalId = null, addingKind = 'vast';
+
+function load() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  data = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(defaultData));
+  if (!data.periods) data.periods = {};
+  if (!data.vasteLasten) data.vasteLasten = [];
+  if (!data.goals) data.goals = [];
+  if (!data.leefgeld && data.leefgeld !== 0) data.leefgeld = 200;
+  if (!data.sparen && data.sparen !== 0) data.sparen = 0;
+  if (!data.salarisdag) {
+    document.getElementById('setupScreen').style.display = 'flex';
+    return;
+  }
+  if (!data.currentPeriod) data.currentPeriod = currentPeriodId();
+  ensurePeriod(data.currentPeriod);
+}
+
+function finishSetup() {
+  const dag = parseInt(document.getElementById('setupSalarisdag').value);
+  const sparen = parseNum(document.getElementById('setupSparen').value) || 0;
+  const leef = parseNum(document.getElementById('setupLeefgeld').value);
+  if (!dag || dag < 1 || dag > 31) { toast('Vul een geldige dag in (1-31)'); return; }
+  if (isNaN(leef) || leef < 0) { toast('Vul een geldig leefgeldbedrag in'); return; }
+  data.salarisdag = dag;
+  data.sparen = sparen;
+  data.leefgeld = leef;
+  data.currentPeriod = currentPeriodId();
+  ensurePeriod(data.currentPeriod);
+  save();
+  document.getElementById('setupScreen').style.display = 'none';
+  render();
+  toast('Instellingen opgeslagen!');
+}
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+function ensurePeriod(pid) {
+  if (!data.periods[pid]) {
+    data.periods[pid] = { salary: 0, extraCosts: [], extraIncome: [], leefSaldo: null };
+    save();
+  }
+}
+
+function getPeriod() { return data.periods[data.currentPeriod]; }
+
+function parseNum(str) {
+  if (str === '' || str === null || str === undefined) return NaN;
+  return parseFloat(String(str).replace(',', '.'));
+}
+
+function fmt(n) {
+  const abs = Math.abs(n);
+  const str = '€' + abs.toFixed(2).replace('.', ',');
+  return n < 0 ? '-' + str : str;
+}
+
+function switchPeriod() {
+  data.currentPeriod = document.getElementById('periodSelect').value;
+  save(); render();
+}
+
+function initPeriods() {
+  const sel = document.getElementById('periodSelect');
+  const pids = Object.keys(data.periods).sort().reverse();
+  sel.innerHTML = pids.map(p =>
+    `<option value="${p}" ${p === data.currentPeriod ? 'selected' : ''}>${periodLabel(p)}</option>`
+  ).join('');
+}
+
+function calcTotals() {
+  const p = getPeriod();
+  const salary = p.salary || 0;
+  const extraIncome = p.extraIncome.reduce((s, t) => s + t.amount, 0);
+  const totalIncome = salary + extraIncome;
+  const vasteTotal = data.vasteLasten.reduce((s, t) => s + t.amount, 0);
+  const extraTotal = p.extraCosts.reduce((s, t) => s + t.amount, 0);
+  const leefSaldo = p.leefSaldo !== null && p.leefSaldo !== undefined ? p.leefSaldo : null;
+  const leefAanvullen = leefSaldo !== null ? Math.max(0, data.leefgeld - leefSaldo) : data.leefgeld;
+  const sparen = data.sparen || 0;
+  const totalExpense = vasteTotal + extraTotal + leefAanvullen + sparen;
+  const overBesteden = totalIncome - totalExpense;
+  return { salary, extraIncome, totalIncome, vasteTotal, extraTotal, totalExpense, overBesteden, leefgeld: data.leefgeld, leefSaldo, leefAanvullen, sparen };
+}
+
+function render() {
+  initPeriods();
+  const p = getPeriod();
+  const t = calcTotals();
+
+  document.getElementById('salaryInput').value = p.salary || '';
+  document.getElementById('hoofdAmount').textContent = fmt(t.vasteTotal + t.extraTotal);
+  document.getElementById('leefTarget').textContent = fmt(t.leefgeld);
+  document.getElementById('leefSaldoInput').value = t.leefSaldo !== null ? t.leefSaldo : '';
+
+  const leefResultEl = document.getElementById('leefResult');
+  if (t.leefSaldo !== null) {
+    if (t.leefAanvullen > 0) {
+      leefResultEl.innerHTML = `Overboeken naar leefgeld: <strong style="color:var(--accent2)">${fmt(t.leefAanvullen)}</strong>`;
+    } else {
+      leefResultEl.innerHTML = `<span style="color:var(--green)">✓ Je leefgeldrekening staat al op of boven ${fmt(t.leefgeld)}!</span>`;
+    }
+  } else {
+    leefResultEl.innerHTML = `<span style="color:var(--text2)">Vul je huidige saldo in</span>`;
+  }
+
+  // Verdeling
+  const vHTML = `
+    <div class="verdeling-row"><div class="vr-left"><span class="vr-icon">💼</span><span class="vr-name">Salaris</span></div><span class="vr-amount green">${fmt(t.salary)}</span></div>
+    ${t.extraIncome > 0 ? `<div class="verdeling-row"><div class="vr-left"><span class="vr-icon">💵</span><span class="vr-name">Extra inkomsten</span></div><span class="vr-amount green">+${fmt(t.extraIncome)}</span></div>` : ''}
+    <div class="verdeling-row"><div class="vr-left"><span class="vr-icon">🔒</span><span class="vr-name">Vaste lasten</span></div><span class="vr-amount red">-${fmt(t.vasteTotal)}</span></div>
+    <div class="verdeling-row"><div class="vr-left"><span class="vr-icon">⚡</span><span class="vr-name">Extra kosten</span></div><span class="vr-amount red">-${fmt(t.extraTotal)}</span></div>
+    <div class="verdeling-row"><div class="vr-left"><span class="vr-icon">🎉</span><span class="vr-name">Aanvullen leefgeld</span></div><span class="vr-amount purple">-${fmt(t.leefAanvullen)}</span></div>
+    ${t.sparen > 0 ? `<div class="verdeling-row"><div class="vr-left"><span class="vr-icon">🐷</span><span class="vr-name">Sparen</span></div><span class="vr-amount green">-${fmt(t.sparen)}</span></div>` : ''}
+    <div class="verdeling-row" style="border-top:2px solid var(--accent);margin-top:4px;padding-top:12px">
+      <div class="vr-left"><span class="vr-icon">💰</span><span class="vr-name" style="font-weight:700">Over om te besteden</span></div>
+      <span class="vr-amount" style="font-size:18px;font-weight:800;color:${t.overBesteden >= 0 ? 'var(--green)' : 'var(--red)'}">${fmt(t.overBesteden)}</span>
+    </div>
+  `;
+  document.getElementById('verdelingContent').innerHTML = vHTML;
+
+  // Ring
+  const circ = 2 * Math.PI * 65;
+  if (t.totalIncome > 0) {
+    const savePct = Math.max(0, Math.round((t.overBesteden / t.totalIncome) * 100));
+    document.getElementById('ringPct').textContent = savePct + '%';
+    document.getElementById('ringCircle').style.strokeDashoffset = circ - (circ * Math.min(savePct, 100) / 100);
+    document.getElementById('ringLabel').textContent = fmt(t.overBesteden) + ' over om te besteden';
+  } else {
+    document.getElementById('ringPct').textContent = '0%';
+    document.getElementById('ringCircle').style.strokeDashoffset = circ;
+    document.getElementById('ringLabel').textContent = 'Vul je salaris in om te beginnen';
+  }
+
+  renderVasteLasten();
+  renderExtraCosts();
+  renderExtraIncome();
+  renderChart();
+  renderStats(t);
+  renderGoals();
+  renderSettings();
+}
+
+function renderVasteLasten() {
+  const list = document.getElementById('vastList');
+  if (!data.vasteLasten.length) { list.innerHTML = '<div class="empty">Nog geen vaste lasten toegevoegd</div>'; return; }
+  list.innerHTML = data.vasteLasten.map(t => `
+    <div class="tx-item" onclick="editVast(${t.id})">
+      <div class="tx-icon expense">${ICONS[t.category] || '📦'}</div>
+      <div class="tx-info"><div class="name">${t.name}</div><div class="sub">${t.category}</div></div>
+      <div class="tx-amt red">-${fmt(t.amount)}</div>
+    </div>`).join('');
+}
+
+function renderExtraCosts() {
+  const list = document.getElementById('extraList');
+  const extras = getPeriod().extraCosts;
+  if (!extras.length) { list.innerHTML = '<div class="empty">Geen extra kosten deze periode</div>'; return; }
+  list.innerHTML = extras.map(t => `
+    <div class="tx-item" onclick="editExtra(${t.id})">
+      <div class="tx-icon extra">${ICONS[t.category] || '📦'}</div>
+      <div class="tx-info"><div class="name">${t.name}</div><div class="sub">${t.category}</div></div>
+      <div class="tx-amt orange">-${fmt(t.amount)}</div>
+    </div>`).join('');
+}
+
+function renderExtraIncome() {
+  const list = document.getElementById('extraIncomeList');
+  const extras = getPeriod().extraIncome || [];
+  if (!extras.length) { list.innerHTML = '<div class="empty">Geen extra inkomsten deze periode</div>'; return; }
+  list.innerHTML = extras.map(t => `
+    <div class="tx-item" onclick="editExtraIncome(${t.id})">
+      <div class="tx-icon income">${ICONS[t.category] || '💵'}</div>
+      <div class="tx-info"><div class="name">${t.name}</div><div class="sub">${t.category || 'Overig inkomen'}</div></div>
+      <div class="tx-amt green">+${fmt(t.amount)}</div>
+    </div>`).join('');
+}
+
+function renderChart() {
+  const all = [...data.vasteLasten, ...getPeriod().extraCosts];
+  const cats = {};
+  all.forEach(t => { cats[t.category] = (cats[t.category] || 0) + t.amount; });
+  const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  const max = sorted.length ? sorted[0][1] : 1;
+  document.getElementById('barChart').innerHTML = sorted.length ? sorted.map(([cat, val]) => `
+    <div class="bar-row">
+      <div class="bar-label">${ICONS[cat]||'📦'} ${cat}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(val/max)*100}%;background:${CAT_COLORS[cat]||'#6b7280'}"><span class="bar-val">${fmt(val)}</span></div></div>
+    </div>`).join('') : '<div class="empty">Nog geen uitgaven</div>';
+}
+
+function renderStats(t) {
+  const periods = Object.keys(data.periods).sort().reverse();
+  const historyHTML = periods.length > 1 ? periods.slice(0, 6).map(pid => {
+    const pp = data.periods[pid];
+    const s = pp.salary || 0;
+    const ei = (pp.extraIncome||[]).reduce((sum,x)=>sum+x.amount,0);
+    const v = data.vasteLasten.reduce((sum,x)=>sum+x.amount,0);
+    const e = pp.extraCosts.reduce((sum,x)=>sum+x.amount,0);
+    const leefS = pp.leefSaldo !== null && pp.leefSaldo !== undefined ? pp.leefSaldo : null;
+    const leefA = leefS !== null ? Math.max(0, data.leefgeld - leefS) : data.leefgeld;
+    const over = s + ei - v - e - leefA - (data.sparen||0);
+    return `<div class="stat-row"><span class="stat-label">${periodLabel(pid)}</span><span class="stat-value" style="color:${over>=0?'var(--green)':'var(--red)'}">${fmt(over)}</span></div>`;
+  }).join('') : '<div class="empty">Nog maar 1 periode</div>';
+
+  document.getElementById('statsContent').innerHTML = `
+    <div class="stat-card">
+      <h3>Deze periode</h3>
+      <div class="stat-row"><span class="stat-label">Salaris</span><span class="stat-value" style="color:var(--green)">${fmt(t.salary)}</span></div>
+      ${t.extraIncome > 0 ? `<div class="stat-row"><span class="stat-label">Extra inkomsten</span><span class="stat-value" style="color:var(--green)">${fmt(t.extraIncome)}</span></div>` : ''}
+      <div class="stat-row"><span class="stat-label">Vaste lasten</span><span class="stat-value">${fmt(t.vasteTotal)}</span></div>
+      <div class="stat-row"><span class="stat-label">Extra kosten</span><span class="stat-value">${fmt(t.extraTotal)}</span></div>
+      <div class="stat-row"><span class="stat-label">Aanvullen leefgeld</span><span class="stat-value">${fmt(t.leefAanvullen)}</span></div>
+      ${t.sparen > 0 ? `<div class="stat-row"><span class="stat-label">Sparen</span><span class="stat-value">${fmt(t.sparen)}</span></div>` : ''}
+      <div class="stat-row"><span class="stat-label">Over om te besteden</span><span class="stat-value" style="color:${t.overBesteden>=0?'var(--green)':'var(--red)'}"><strong>${fmt(t.overBesteden)}</strong></span></div>
+    </div>
+    <div class="stat-card">
+      <h3>Geschiedenis</h3>
+      ${historyHTML}
+    </div>
+  `;
+}
+
+function renderGoals() {
+  document.getElementById('goalsList').innerHTML = data.goals.length ? data.goals.map(g => {
+    const pct = Math.min(Math.round((g.saved / g.target) * 100), 100);
+    return `
+      <div class="goal-card" onclick="editGoal(${g.id})">
+        <div class="goal-top"><span class="goal-name">${g.name}</span><span class="goal-pct">${pct}%</span></div>
+        <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${pct}%"></div></div>
+        <div class="goal-amounts"><span>${fmt(g.saved)} gespaard</span><span>Doel: ${fmt(g.target)}</span></div>
+      </div>`;
+  }).join('') : '<div class="empty">Nog geen spaardoelen. Voeg er een toe!</div>';
+}
+
+function renderSettings() {
+  document.getElementById('settingsContent').innerHTML = `
+    <div class="settings-item">
+      <span class="si-label">Salarisdag</span>
+      <span><span class="si-value">${data.salarisdag}e van de maand</span> <button class="si-edit" onclick="openSalarisdagModal()">Wijzig</button></span>
+    </div>
+    <div class="settings-item">
+      <span class="si-label">Sparen per periode</span>
+      <span><span class="si-value">${fmt(data.sparen)}</span> <button class="si-edit" onclick="openSparenModal()">Wijzig</button></span>
+    </div>
+    <div class="settings-item">
+      <span class="si-label">Leefgeld per periode</span>
+      <span><span class="si-value">${fmt(data.leefgeld)}</span> <button class="si-edit" onclick="openLeefModal()">Wijzig</button></span>
+    </div>
+    <div class="settings-item"><span class="si-label">Vaste lasten</span><span class="si-value">${data.vasteLasten.length} posten (${fmt(data.vasteLasten.reduce((s,t)=>s+t.amount,0))})</span></div>
+    <div class="settings-item"><span class="si-label">Periodes</span><span class="si-value">${Object.keys(data.periods).length}</span></div>
+    <div class="settings-item"><span class="si-label">Spaardoelen</span><span class="si-value">${data.goals.length}</span></div>
+    <div style="margin-top:20px">
+      <button onclick="exportData()" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:none;color:var(--text);font-size:14px;cursor:pointer;margin-bottom:8px">📤 Exporteer data</button>
+      <button onclick="if(confirm('Weet je het zeker? Dit reset ALLES.'))resetData()" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--red);background:none;color:var(--red);font-size:14px;cursor:pointer">🗑️ Reset alles</button>
+    </div>
+    <p style="text-align:center;color:var(--text2);font-size:12px;margin-top:20px">Kay's Geld Overzicht v2.0</p>
+  `;
+}
+
+// --- Actions ---
+
+function saveSalary() {
+  const val = parseNum(document.getElementById('salaryInput').value) || 0;
+  getPeriod().salary = val;
+  save(); render();
+}
+
+function saveLeefSaldo() {
+  const val = document.getElementById('leefSaldoInput').value;
+  getPeriod().leefSaldo = val !== '' ? parseNum(val) : null;
+  save(); render();
+}
+
+function openAddModal(kind) {
+  addingKind = kind;
+  editingTxId = null;
+  document.getElementById('modalTitle').textContent =
+    kind === 'vast' ? 'Vaste last toevoegen' :
+    kind === 'extra' ? 'Extra kost toevoegen' : 'Extra inkomst toevoegen';
+  document.getElementById('txName').value = '';
+  document.getElementById('txAmount').value = '';
+  document.getElementById('txKind').value = kind;
+  document.getElementById('deleteTxBtn').style.display = 'none';
+  document.getElementById('rekGroup').style.display = kind === 'extraIncome' ? 'none' : 'block';
+
+  if (kind === 'extraIncome') {
+    document.getElementById('txCategory').innerHTML = `
+      <option value="Toeslagen">🏛️ Toeslagen</option>
+      <option value="Overig inkomen">💵 Overig inkomen</option>
+    `;
+  } else {
+    document.getElementById('txCategory').innerHTML = `
+      <option value="Verzekeringen">🛡️ Verzekeringen</option>
+      <option value="Vervoer">🚗 Vervoer</option>
+      <option value="Telecom">📱 Telecom</option>
+      <option value="Abonnementen">🎵 Abonnementen</option>
+      <option value="Studie">📚 Studie / Duo</option>
+      <option value="Wonen">🏠 Wonen</option>
+      <option value="Persoonlijk">👤 Persoonlijk</option>
+      <option value="Gezondheid">🏥 Gezondheid</option>
+      <option value="Boodschappen">🛒 Boodschappen</option>
+      <option value="Sparen">🐷 Sparen</option>
+      <option value="Overig">📦 Overig</option>
+    `;
+  }
+  openModal('txModal');
+}
+
+function editVast(id) {
+  const t = data.vasteLasten.find(x => x.id === id); if (!t) return;
+  addingKind = 'vast'; editingTxId = id;
+  document.getElementById('modalTitle').textContent = 'Vaste last bewerken';
+  document.getElementById('txName').value = t.name;
+  document.getElementById('txAmount').value = t.amount;
+  document.getElementById('txKind').value = 'vast';
+  document.getElementById('deleteTxBtn').style.display = 'block';
+  document.getElementById('rekGroup').style.display = 'block';
+  document.getElementById('txCategory').innerHTML = `
+    <option value="Verzekeringen">🛡️ Verzekeringen</option><option value="Vervoer">🚗 Vervoer</option>
+    <option value="Telecom">📱 Telecom</option><option value="Abonnementen">🎵 Abonnementen</option>
+    <option value="Studie">📚 Studie / Duo</option><option value="Wonen">🏠 Wonen</option>
+    <option value="Persoonlijk">👤 Persoonlijk</option><option value="Gezondheid">🏥 Gezondheid</option>
+    <option value="Boodschappen">🛒 Boodschappen</option><option value="Sparen">🐷 Sparen</option>
+    <option value="Overig">📦 Overig</option>`;
+  document.getElementById('txCategory').value = t.category;
+  document.getElementById('txRekening').value = t.rekening || 'hoofd';
+  openModal('txModal');
+}
+
+function editExtra(id) {
+  const t = getPeriod().extraCosts.find(x => x.id === id); if (!t) return;
+  addingKind = 'extra'; editingTxId = id;
+  document.getElementById('modalTitle').textContent = 'Extra kost bewerken';
+  document.getElementById('txName').value = t.name;
+  document.getElementById('txAmount').value = t.amount;
+  document.getElementById('txKind').value = 'extra';
+  document.getElementById('deleteTxBtn').style.display = 'block';
+  document.getElementById('rekGroup').style.display = 'block';
+  document.getElementById('txCategory').innerHTML = `
+    <option value="Verzekeringen">🛡️ Verzekeringen</option><option value="Vervoer">🚗 Vervoer</option>
+    <option value="Telecom">📱 Telecom</option><option value="Abonnementen">🎵 Abonnementen</option>
+    <option value="Studie">📚 Studie / Duo</option><option value="Wonen">🏠 Wonen</option>
+    <option value="Persoonlijk">👤 Persoonlijk</option><option value="Gezondheid">🏥 Gezondheid</option>
+    <option value="Boodschappen">🛒 Boodschappen</option><option value="Sparen">🐷 Sparen</option>
+    <option value="Overig">📦 Overig</option>`;
+  document.getElementById('txCategory').value = t.category;
+  document.getElementById('txRekening').value = t.rekening || 'hoofd';
+  openModal('txModal');
+}
+
+function editExtraIncome(id) {
+  const t = (getPeriod().extraIncome||[]).find(x => x.id === id); if (!t) return;
+  addingKind = 'extraIncome'; editingTxId = id;
+  document.getElementById('modalTitle').textContent = 'Extra inkomst bewerken';
+  document.getElementById('txName').value = t.name;
+  document.getElementById('txAmount').value = t.amount;
+  document.getElementById('txKind').value = 'extraIncome';
+  document.getElementById('deleteTxBtn').style.display = 'block';
+  document.getElementById('rekGroup').style.display = 'none';
+  document.getElementById('txCategory').innerHTML = `
+    <option value="Toeslagen">🏛️ Toeslagen</option>
+    <option value="Overig inkomen">💵 Overig inkomen</option>`;
+  document.getElementById('txCategory').value = t.category || 'Overig inkomen';
+  openModal('txModal');
+}
+
+function saveTx() {
+  const name = document.getElementById('txName').value.trim();
+  const amount = parseNum(document.getElementById('txAmount').value);
+  if (!name || isNaN(amount) || amount <= 0) { toast('Vul alle velden in'); return; }
+
+  const kind = document.getElementById('txKind').value;
+  const entry = {
+    id: editingTxId || Date.now(),
+    name, amount,
+    category: document.getElementById('txCategory').value,
+    rekening: document.getElementById('txRekening').value
+  };
+
+  if (kind === 'vast') {
+    if (editingTxId) {
+      const idx = data.vasteLasten.findIndex(t => t.id === editingTxId);
+      if (idx >= 0) data.vasteLasten[idx] = entry;
+    } else { data.vasteLasten.push(entry); }
+  } else if (kind === 'extra') {
+    const p = getPeriod();
+    if (editingTxId) {
+      const idx = p.extraCosts.findIndex(t => t.id === editingTxId);
+      if (idx >= 0) p.extraCosts[idx] = entry;
+    } else { p.extraCosts.push(entry); }
+  } else {
+    const p = getPeriod();
+    if (!p.extraIncome) p.extraIncome = [];
+    if (editingTxId) {
+      const idx = p.extraIncome.findIndex(t => t.id === editingTxId);
+      if (idx >= 0) p.extraIncome[idx] = entry;
+    } else { p.extraIncome.push(entry); }
+  }
+
+  save(); closeModal('txModal'); render();
+  toast(editingTxId ? 'Bijgewerkt!' : 'Toegevoegd!');
+}
+
+function deleteTx() {
+  if (!confirm('Verwijderen?')) return;
+  const kind = document.getElementById('txKind').value;
+  if (kind === 'vast') {
+    data.vasteLasten = data.vasteLasten.filter(t => t.id !== editingTxId);
+  } else if (kind === 'extra') {
+    getPeriod().extraCosts = getPeriod().extraCosts.filter(t => t.id !== editingTxId);
+  } else {
+    getPeriod().extraIncome = (getPeriod().extraIncome||[]).filter(t => t.id !== editingTxId);
+  }
+  save(); closeModal('txModal'); render(); toast('Verwijderd');
+}
+
+function openLeefModal() {
+  document.getElementById('leefInput').value = data.leefgeld;
+  openModal('leefModal');
+}
+function saveLeefgeld() {
+  const val = parseNum(document.getElementById('leefInput').value);
+  if (isNaN(val) || val < 0) return;
+  data.leefgeld = val;
+  save(); closeModal('leefModal'); render(); toast('Leefgeld bijgewerkt!');
+}
+
+function openSalarisdagModal() {
+  document.getElementById('salarisdagInput').value = data.salarisdag;
+  openModal('salarisdagModal');
+}
+function saveSalarisdag() {
+  const val = parseInt(document.getElementById('salarisdagInput').value);
+  if (!val || val < 1 || val > 31) { toast('Vul een dag in (1-31)'); return; }
+  data.salarisdag = val;
+  save(); closeModal('salarisdagModal'); render(); toast('Salarisdag bijgewerkt!');
+}
+
+function openSparenModal() {
+  document.getElementById('sparenInput').value = data.sparen;
+  openModal('sparenModal');
+}
+function saveSparen() {
+  const val = parseNum(document.getElementById('sparenInput').value) || 0;
+  if (val < 0) return;
+  data.sparen = val;
+  save(); closeModal('sparenModal'); render(); toast('Spaarbedrag bijgewerkt!');
+}
+
+function openNewPeriodModal() {
+  const today = new Date();
+  const dag = getSalarisdag();
+  const next = new Date(today.getFullYear(), today.getMonth() + (today.getDate() >= dag ? 1 : 0), dag);
+  document.getElementById('newPeriodDate').value = next.toISOString().slice(0, 10);
+  openModal('newPeriodModal');
+}
+function createNewPeriod() {
+  const dateVal = document.getElementById('newPeriodDate').value;
+  if (!dateVal) return;
+  const pid = makePeriodId(dateVal);
+  ensurePeriod(pid);
+  data.currentPeriod = pid;
+  save(); closeModal('newPeriodModal'); render();
+  toast('Nieuwe periode gestart!');
+}
+
+// Goals
+function openGoalModal() {
+  editingGoalId = null;
+  document.getElementById('goalModalTitle').textContent = 'Spaardoel toevoegen';
+  document.getElementById('goalName').value = '';
+  document.getElementById('goalTarget').value = '';
+  document.getElementById('goalSaved').value = '0';
+  document.getElementById('deleteGoalBtn').style.display = 'none';
+  openModal('goalModal');
+}
+function editGoal(id) {
+  const g = data.goals.find(x => x.id === id); if (!g) return;
+  editingGoalId = id;
+  document.getElementById('goalModalTitle').textContent = 'Spaardoel bewerken';
+  document.getElementById('goalName').value = g.name;
+  document.getElementById('goalTarget').value = g.target;
+  document.getElementById('goalSaved').value = g.saved;
+  document.getElementById('deleteGoalBtn').style.display = 'block';
+  openModal('goalModal');
+}
+function saveGoal() {
+  const name = document.getElementById('goalName').value.trim();
+  const target = parseNum(document.getElementById('goalTarget').value);
+  const saved = parseNum(document.getElementById('goalSaved').value) || 0;
+  if (!name || isNaN(target) || target <= 0) { toast('Vul alle velden in'); return; }
+  if (editingGoalId) {
+    const g = data.goals.find(x => x.id === editingGoalId);
+    if (g) { g.name = name; g.target = target; g.saved = saved; }
+  } else { data.goals.push({ id: Date.now(), name, target, saved }); }
+  save(); closeModal('goalModal'); render(); toast('Spaardoel opgeslagen!');
+}
+function deleteGoal() {
+  if (!confirm('Verwijderen?')) return;
+  data.goals = data.goals.filter(g => g.id !== editingGoalId);
+  save(); closeModal('goalModal'); render(); toast('Verwijderd');
+}
+
+// Utilities
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+function goPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  btn.classList.add('active');
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'geld-overzicht-backup.json'; a.click(); toast('Data geëxporteerd!');
+}
+function resetData() {
+  localStorage.removeItem(STORAGE_KEY);
+  data = JSON.parse(JSON.stringify(defaultData));
+  ensurePeriod(data.currentPeriod);
+  save(); render(); toast('Reset compleet');
+}
+
+// Init
+load();
+if (data.salarisdag) render();
+</script>
+</body>
+</html>

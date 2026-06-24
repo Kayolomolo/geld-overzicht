@@ -1,0 +1,9 @@
+{
+  "name": "Kay's Geld Overzicht",
+  "short_name": "Geld",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [{"src": "Icon.jpeg", "sizes": "512x512", "type": "image/jpeg"}]
+}
